@@ -15,6 +15,8 @@
 		D012C9C01B852DDD000A928E /* Ji.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BD1B852DDD000A928E /* Ji.swift */; };
 		D012C9C11B852DDD000A928E /* JiHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BE1B852DDD000A928E /* JiHelper.swift */; };
 		D012C9C21B852DDD000A928E /* JiNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BF1B852DDD000A928E /* JiNode.swift */; };
+		D012C9C41B852ED1000A928E /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D012C9C31B852ED1000A928E /* libxml2.2.tbd */; };
+		D012C9C61B852ED6000A928E /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D012C9C51B852ED6000A928E /* libxml2.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +42,9 @@
 		D012C9BD1B852DDD000A928E /* Ji.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ji.swift; sourceTree = "<group>"; };
 		D012C9BE1B852DDD000A928E /* JiHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JiHelper.swift; sourceTree = "<group>"; };
 		D012C9BF1B852DDD000A928E /* JiNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JiNode.swift; sourceTree = "<group>"; };
+		D012C9C31B852ED1000A928E /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
+		D012C9C51B852ED6000A928E /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
+		D012C9C91B852F53000A928E /* CoreDataModelParser-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreDataModelParser-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +52,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D012C9C61B852ED6000A928E /* libxml2.tbd in Frameworks */,
+				D012C9C41B852ED1000A928E /* libxml2.2.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +80,7 @@
 		D012C9A91B852C3A000A928E /* CoreDataModelParser */ = {
 			isa = PBXGroup;
 			children = (
+				D012C9C91B852F53000A928E /* CoreDataModelParser-Bridging-Header.h */,
 				D012C9AA1B852C3A000A928E /* main.swift */,
 			);
 			path = CoreDataModelParser;
@@ -83,6 +91,7 @@
 			children = (
 				D012C9B21B852C7F000A928E /* CommandLine */,
 				D012C9BB1B852DDD000A928E /* Ji */,
+				D012C9C71B852EEB000A928E /* libxml */,
 			);
 			path = Vendor;
 			sourceTree = "<group>";
@@ -107,6 +116,15 @@
 				D012C9BF1B852DDD000A928E /* JiNode.swift */,
 			);
 			path = Ji;
+			sourceTree = "<group>";
+		};
+		D012C9C71B852EEB000A928E /* libxml */ = {
+			isa = PBXGroup;
+			children = (
+				D012C9C51B852ED6000A928E /* libxml2.tbd */,
+				D012C9C31B852ED1000A928E /* libxml2.2.tbd */,
+			);
+			name = libxml;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,10 +232,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lxml2";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/CoreDataModelParser/CoreDataModelParser-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -251,9 +272,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDKROOT)/usr/include/libxml2";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-lxml2";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/CoreDataModelParser/CoreDataModelParser-Bridging-Header.h";
 			};
 			name = Release;
 		};

@@ -79,7 +79,7 @@ public class JiNode {
 	init(xmlNode: xmlNodePtr, jiDocument: Ji, keepTextNode: Bool = false) {
 		self.xmlNode = xmlNode
 		document = jiDocument
-		type = JiNodeType(rawValue: Int(xmlNode.memory.type.value))!
+		type = JiNodeType(rawValue: Int(xmlNode.memory.type.rawValue))!
 		self.keepTextNode = keepTextNode
 	}
 	
@@ -559,7 +559,7 @@ public class JiNodeGenerator: GeneratorType {
 }
 
 // MARK: - Printable
-extension JiNode: Printable {
+extension JiNode: CustomStringConvertible {
 	public var description: String {
 		return rawContent ?? "nil"
 	}

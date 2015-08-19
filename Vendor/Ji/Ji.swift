@@ -69,10 +69,10 @@ public class Ji {
 			let cEncoding: UnsafePointer<CChar> = CFStringGetCStringPtr(cfEncodingAsString, 0)
 			
 			if isXML {
-				let options = CInt(XML_PARSE_RECOVER.value)
+				let options = CInt(XML_PARSE_RECOVER.rawValue)
 				xmlDoc = xmlReadMemory(cBuffer, cSize, nil, cEncoding, options)
 			} else {
-				let options = CInt(HTML_PARSE_RECOVER.value | HTML_PARSE_NOWARNING.value | HTML_PARSE_NOERROR.value)
+				let options = CInt(HTML_PARSE_RECOVER.rawValue | HTML_PARSE_NOWARNING.rawValue | HTML_PARSE_NOERROR.rawValue)
 				htmlDoc = htmlReadMemory(cBuffer, cSize, nil, cEncoding, options)
 			}
 			if xmlDoc == nil { return nil }
@@ -291,7 +291,7 @@ public func ==(lhs: Ji, rhs: Ji) -> Bool {
 }
 
 // MARK: - Printable
-extension Ji: Printable {
+extension Ji: CustomStringConvertible {
 	public var description: String {
 		return rootNode?.rawContent ?? "nil"
 	}
