@@ -10,7 +10,6 @@
 		D012C9AB1B852C3A000A928E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9AA1B852C3A000A928E /* main.swift */; };
 		D012C9B71B852C7F000A928E /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9B31B852C7F000A928E /* CommandLine.swift */; };
 		D012C9B81B852C7F000A928E /* Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9B41B852C7F000A928E /* Option.swift */; };
-		D012C9B91B852C7F000A928E /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = D012C9B51B852C7F000A928E /* README.md */; };
 		D012C9BA1B852C7F000A928E /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9B61B852C7F000A928E /* StringExtensions.swift */; };
 		D012C9C01B852DDD000A928E /* Ji.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BD1B852DDD000A928E /* Ji.swift */; };
 		D012C9C11B852DDD000A928E /* JiHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BE1B852DDD000A928E /* JiHelper.swift */; };
@@ -197,7 +196,6 @@
 				D012C9C01B852DDD000A928E /* Ji.swift in Sources */,
 				D012C9BA1B852C7F000A928E /* StringExtensions.swift in Sources */,
 				D0663F371B85642C00B8CE4B /* Actions.swift in Sources */,
-				D012C9B91B852C7F000A928E /* README.md in Sources */,
 				D012C9B71B852C7F000A928E /* CommandLine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

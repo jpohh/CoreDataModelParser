@@ -22,7 +22,7 @@ func verifyAttributes(attributes: [Attribute]) -> Bool {
     return true
 }
 
-func generateSourceFiles(entities: [Entity], attributes: [Attribute]) -> [String: [String]]? {
-    return nil
+func generateSourceFiles(entities: [Entity], attributes: [Attribute]) -> [(filename: String, code: [String])] {
+    return entities.map(fileForEntity)
 }
 

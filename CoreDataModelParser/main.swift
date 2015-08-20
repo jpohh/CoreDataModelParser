@@ -13,6 +13,7 @@ let cli = CommandLine()
 let filePath = StringOption(shortFlag: "f", longFlag: "file", required: true, helpMessage: "Path to the xcdatamodeld file")
 let outputPath = StringOption(shortFlag: "o", longFlag: "output", required: false, helpMessage: "Where to direct output files to. In this location, they'll write to a directory called \"generated\", and all generated source files will live in there")
 cli.addOption(filePath)
+cli.addOption(outputPath)
 
 do {
     try cli.parse()
@@ -89,7 +90,37 @@ guard let modelRootNode = modelDocument.rootNode else {
 }
 
 func attributeTypeForString(string: String?) -> NSAttributeType {
-    return .UndefinedAttributeType
+    guard let string = string else {
+        return .UndefinedAttributeType
+    }
+    switch string {
+    case "Binary Data":
+        return .BinaryDataAttributeType
+    case "Boolean":
+        return .BooleanAttributeType
+    case "Date":
+        return .DateAttributeType
+    case "Decimal":
+        return .DecimalAttributeType
+    case "Double":
+        return .DoubleAttributeType
+    case "Float":
+        return .FloatAttributeType
+    case "Integer 16":
+        return .Integer16AttributeType
+    case "Integer 32":
+        return .Integer32AttributeType
+    case "Integer 64":
+        return .Integer64AttributeType
+    case "Object ID":
+        return .ObjectIDAttributeType
+    case "String":
+        return .StringAttributeType
+    case "Transformable":
+        return .TransformableAttributeType
+    default:
+        return .UndefinedAttributeType
+    }
 }
 
 func userInfoFromString(string: String?) -> [String: String] {
@@ -138,7 +169,6 @@ let entities = entityNodes.map { (entity: JiNode) -> Entity in
     let syncable = entity.attributes["syncable"] == "YES"
     return Entity(attributes: attributes, className: className, name: name, renamingIdentifier: renamingIdentifier, syncable: syncable)
 }
-print(entities)
 
 struct Model {
     let entities: [Entity]
@@ -159,7 +189,7 @@ struct Model {
         return verifyAttributes(attributes)
     }
     
-    var sourceFiles: [String: [String]]? {
+    var sourceFiles: [(filename: String, code: [String])] {
         return generateSourceFiles(entities, attributes: attributes)
     }
 }
@@ -175,21 +205,22 @@ guard model.attributesVerifiedCorrectly else {
     print("EXIT: Attribute verification failed. Check your verifyAttributes implementation in Model.swift")
     exit(EX_DATAERR)
 }
-guard let sourceFiles = model.sourceFiles else {
-    exit(EX_OK)
-}
+let sourceFiles = model.sourceFiles
 guard let outputPath = outputPath.value else {
     print("EXIT: Can't output files. No output path was provided.")
     exit(EX_USAGE)
 }
 
 for (filename, code) in sourceFiles {
-    let allCode = ",".join(code)
-    let path = outputPath + "/generated/" + filename
+    let allCode = "\n".join(code)
+    let filePath = outputPath + "/generated"
+    let path = filePath + "/" + filename
     do {
+        try NSFileManager.defaultManager().createDirectoryAtPath(filePath, withIntermediateDirectories: true, attributes: nil)
         try allCode.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
+        print("wrote to \(path)")
     } catch {
-        print("EXIT: error writing file.")
+        print("EXIT: error writing file. \(error)")
         exit(EX_DATAERR)
     }
 }
