@@ -61,6 +61,12 @@
             ReferencedContainer = "container:CoreDataModelParser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-f /Users/jpo/Documents/Ambur/Model/Waiter_Helper.xcdatamodeld"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

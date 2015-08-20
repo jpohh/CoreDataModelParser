@@ -17,6 +17,8 @@
 		D012C9C21B852DDD000A928E /* JiNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D012C9BF1B852DDD000A928E /* JiNode.swift */; };
 		D012C9C41B852ED1000A928E /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D012C9C31B852ED1000A928E /* libxml2.2.tbd */; };
 		D012C9C61B852ED6000A928E /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D012C9C51B852ED6000A928E /* libxml2.tbd */; };
+		D0663F371B85642C00B8CE4B /* Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0663F361B85642C00B8CE4B /* Actions.swift */; };
+		D0663F391B856BF200B8CE4B /* CanonicalFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0663F381B856BF200B8CE4B /* CanonicalFiles.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -45,6 +47,8 @@
 		D012C9C31B852ED1000A928E /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
 		D012C9C51B852ED6000A928E /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		D012C9C91B852F53000A928E /* CoreDataModelParser-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreDataModelParser-Bridging-Header.h"; sourceTree = "<group>"; };
+		D0663F361B85642C00B8CE4B /* Actions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Actions.swift; sourceTree = "<group>"; };
+		D0663F381B856BF200B8CE4B /* CanonicalFiles.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CanonicalFiles.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +86,8 @@
 			children = (
 				D012C9C91B852F53000A928E /* CoreDataModelParser-Bridging-Header.h */,
 				D012C9AA1B852C3A000A928E /* main.swift */,
+				D0663F361B85642C00B8CE4B /* Actions.swift */,
+				D0663F381B856BF200B8CE4B /* CanonicalFiles.swift */,
 			);
 			path = CoreDataModelParser;
 			sourceTree = "<group>";
@@ -185,10 +191,12 @@
 			files = (
 				D012C9C21B852DDD000A928E /* JiNode.swift in Sources */,
 				D012C9AB1B852C3A000A928E /* main.swift in Sources */,
+				D0663F391B856BF200B8CE4B /* CanonicalFiles.swift in Sources */,
 				D012C9C11B852DDD000A928E /* JiHelper.swift in Sources */,
 				D012C9B81B852C7F000A928E /* Option.swift in Sources */,
 				D012C9C01B852DDD000A928E /* Ji.swift in Sources */,
 				D012C9BA1B852C7F000A928E /* StringExtensions.swift in Sources */,
+				D0663F371B85642C00B8CE4B /* Actions.swift in Sources */,
 				D012C9B91B852C7F000A928E /* README.md in Sources */,
 				D012C9B71B852C7F000A928E /* CommandLine.swift in Sources */,
 			);
@@ -314,6 +322,7 @@
 				D012C9B01B852C3A000A928E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
