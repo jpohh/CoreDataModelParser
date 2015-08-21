@@ -26,6 +26,12 @@ struct Entity {
     let attributes: [Attribute]
     let className: String
     let name: String
+    var properties: [Property] {
+        var properties = attributes.map { $0 as Property }
+        properties.extend(relationships.map { $0 as Property })
+        return properties.sort { $0.name < $1.name }
+    }
+    let relationships: [Relationship]
     let renamingIdentifier: String?
     let syncable: Bool
 }
@@ -40,6 +46,24 @@ struct Attribute: Property {
     let storedInExternalRecord: Bool
     let syncable: Bool
     let transient: Bool
+    let userInfo: [String: String]
+}
+
+struct Relationship: Property {
+    let deleteRule: NSDeleteRule
+    let destinationEntityName: String
+    let indexed: Bool
+    let maxCount: Int
+    let minCount: Int
+    let name: String
+    let optional: Bool
+    let ordered: Bool
+    let renamingIdentifier: String?
+    let storedInExternalRecord: Bool
+    let transient: Bool
+    var toMany: Bool  {
+        return maxCount != 1
+    }
     let userInfo: [String: String]
 }
 
@@ -140,6 +164,16 @@ func userInfoFromString(string: String?) -> [String: String] {
     return userInfo
 }
 
+func userInfoFromNode(node: JiNode) -> [String: String] {
+    let children = node.childrenWithName("userInfo")
+    let userInfo = children.first?.children.reduce([String: String]()) { (dict, node) -> [String: String] in
+        var added = dict
+        added[node.attributes["key"]!] = node.attributes["value"]!
+        return added
+    }
+    return userInfo ?? [:]
+}
+
 let attributeForNode: (JiNode) -> (Attribute) = { node in
     let attributeTypeString = node.attributes["attributeType"]
     let attributeType = attributeTypeForString(attributeTypeString)
@@ -152,22 +186,39 @@ let attributeForNode: (JiNode) -> (Attribute) = { node in
     let syncable = node.attributes["syncable"] == "YES"
     let transient = node.attributes["transient"] == "YES"
     let children = node.childrenWithName("userInfo")
-    let userInfo = children.first?.children.reduce([String: String]()) { (dict, node) -> [String: String] in
-        var added = dict
-        added[node.attributes["key"]!] = node.attributes["value"]!
-        return added
-    }
+    let userInfo = userInfoFromNode(node)
     return Attribute(attributeType: attributeType, defaultValueAsString: defaultValue, indexed: indexed, name: name, optional: optional, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, syncable: syncable, transient: transient, userInfo: userInfo ?? [:])
+}
+
+let relationshipForNode: (JiNode) -> Relationship = { node in
+    let deleteRuleString = node.attributes["deleteRule"]
+    let deleteRule = NSDeleteRule.NoActionDeleteRule
+    let destinationEntityName = node.attributes["destinationEntity"]!
+    let indexed = node.attributes["indexed"] == "YES"
+    let maxCount = Int(node.attributes["maxCount"] ?? "0")!
+    let minCount = Int(node.attributes["minCount"] ?? "0")!
+    let name = node.attributes["name"]!
+    let optional = node.attributes["optional"] == "YES"
+    let ordered = node.attributes["ordered"] == "YES"
+    let renamingIdentifier = node.attributes["renamingIdentifier"]
+    let storedInExternalRecord = node.attributes["storedInExternalRecord"] == "YES"
+    let transient = node.attributes["transient"] == "YES"
+    var toMany: Bool  {
+        return maxCount  > 1
+    }
+    let userInfo = userInfoFromNode(node)
+    return Relationship(deleteRule: deleteRule, destinationEntityName: destinationEntityName, indexed: indexed, maxCount: maxCount, minCount: minCount, name: name, optional: optional, ordered: ordered, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, transient: transient, userInfo: userInfo)
 }
 
 let entityNodes = modelRootNode.childrenWithName("entity")
 let entities = entityNodes.map { (entity: JiNode) -> Entity in
-    let attributes = entity.childrenWithName("attribute").map { attributeForNode($0) }
+    let attributes = entity.childrenWithName("attribute").map(attributeForNode)
+    let relationships = entity.childrenWithName("relationship").map(relationshipForNode)
     let className = entity.attributes["representedClassName"]!
     let name = entity.attributes["name"]!
     let renamingIdentifier = entity.attributes["renamingIdentifier"]
     let syncable = entity.attributes["syncable"] == "YES"
-    return Entity(attributes: attributes, className: className, name: name, renamingIdentifier: renamingIdentifier, syncable: syncable)
+    return Entity(attributes: attributes, className: className, name: name, relationships: relationships, renamingIdentifier: renamingIdentifier, syncable: syncable)
 }
 
 struct Model {

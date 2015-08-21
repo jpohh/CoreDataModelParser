@@ -8,15 +8,6 @@
 
 import Foundation
 
-//class CardReader: NSManagedObject {
-
-//    @NSManaged var ipAddress: String
-//    @NSManaged var name: String
-//    @NSManaged var uniqueID: String
-//    @NSManaged var devices: NSSet
-//
-//}
-
 func typeForAttribute(attribute: Attribute) -> String {
     switch attribute.attributeType {
     case .UndefinedAttributeType:
@@ -48,8 +39,33 @@ func typeForAttribute(attribute: Attribute) -> String {
     }
 }
 
+func typeForRelationship(relationship: Relationship) -> String {
+    var type = ""
+    if relationship.toMany {
+        type = type + "Set<" + relationship.destinationEntityName + ">"
+    } else {
+        type = type + relationship.destinationEntityName
+    }
+    return type
+}
+
+func codeForProperty(property: Property) -> String {
+    if let attribute = property as? Attribute {
+        return codeForAttribute(attribute)
+    } else if let relationship = property as? Relationship {
+        return codeForRelationship(relationship)
+    } else {
+        assertionFailure("code can only be rendered for an attribute or relationship")
+        return ""
+    }
+}
+
+func codeForRelationship(relationship: Relationship) -> String {
+    return "@NSManaged var " + relationship.name + ": " + typeForRelationship(relationship) + (relationship.optional ? "?" : ":")
+}
+
 func codeForAttribute(attribute: Attribute) -> String {
-    return "\t@NSManaged var " + attribute.name + ": " + typeForAttribute(attribute) + (attribute.optional ? "?" : "")
+    return "@NSManaged var " + attribute.name + ": " + typeForAttribute(attribute) + (attribute.optional ? "?" : "")
 }
 
 func codeForAttributes(attributes: [Attribute]) -> [String] {
@@ -59,7 +75,7 @@ func codeForAttributes(attributes: [Attribute]) -> [String] {
 func fileForEntity(entity: Entity) -> (filename: String, code: [String]) {
     var code = [String]()
     code.append("class \(entity.className): NSManagedObject {")
-    code.extend(codeForAttributes(entity.attributes))
+    code.extend(entity.properties.map(codeForProperty))
     code.append("}")
     code.append("")
     return ("\(entity.className).swift", code)
