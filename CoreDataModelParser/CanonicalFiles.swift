@@ -49,7 +49,7 @@ func typeForAttribute(attribute: Attribute) -> String {
 }
 
 func codeForAttribute(attribute: Attribute) -> String {
-    return "\t@NSManaged var " + attribute.name + ": " + typeForAttribute(attribute)
+    return "\t@NSManaged var " + attribute.name + ": " + typeForAttribute(attribute) + (attribute.optional ? "?" : "")
 }
 
 func codeForAttributes(attributes: [Attribute]) -> [String] {

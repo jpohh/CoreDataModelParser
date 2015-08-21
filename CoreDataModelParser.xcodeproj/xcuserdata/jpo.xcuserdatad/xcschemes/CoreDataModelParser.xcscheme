@@ -63,7 +63,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-f /Users/jpo/Documents/Ambur/Model/Waiter_Helper.xcdatamodeld"
+            argument = "-f /Users/jpo/Ambur/Model/Waiter_Helper.xcdatamodeld"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-o /Users/jpo/Desktop"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
