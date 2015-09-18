@@ -226,7 +226,7 @@ struct Model {
     var attributes: [Attribute] { get {
         let a = self.entities.reduce([Attribute]()) { (allAttributes, entity: Entity) in
             var newArray = Array(allAttributes)
-            newArray.extend(entity.attributes)
+            newArray.appendContentsOf(entity.attributes)
             return newArray
         }
         return a
@@ -263,9 +263,8 @@ guard let outputPath = outputPath.value else {
 }
 
 for (filename, code) in sourceFiles {
-    let allCode = "\n".join(code)
-    let filePath = outputPath + "/generated"
-    let path = filePath + "/" + filename
+    let allCode = code.joinWithSeparator(",")
+    let path = outputPath + "/generated/" + filename
     do {
         try NSFileManager.defaultManager().createDirectoryAtPath(filePath, withIntermediateDirectories: true, attributes: nil)
         try allCode.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
