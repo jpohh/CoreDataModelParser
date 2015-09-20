@@ -136,17 +136,28 @@ extension Property {
 
 
 extension Entity {
+    var superclassName: String {
+        return parentEntityName ?? "NSManagedObject"
+    }
+    
     var objCHeaderFile: File {
         var lines = ["// CoreDataModelParser generated"]
         lines.appendContentsOf(relationships.map { "@class " + $0.destinationEntityName + ";" })
         lines.appendContentsOf(["NS_ASSUME_NONNULL_BEGIN", ""])
-        lines.appendContentsOf(["@interface " + name + ": NSManagedObject", ""])
-        lines.appendContentsOf(properties.sort { $0.name < $1.name }.map { $0.line })
-        lines.appendContentsOf([""])
-        lines.appendContentsOf(relationships.map { $0.customAccessorDeclarations }.flatMap{ $0 }.flatMap { $0 })
-        lines.appendContentsOf(["", "@end", "", "NS_ASSUME_NONNULL_END", ""])
+        lines.appendContentsOf(["@interface " + className + ": " + superclassName, ""])
+        let nonTransientProperties = properties.filter { !$0.transient }.sort { $0.name < $1.name }
+        lines.appendContentsOf(nonTransientProperties.map { $0.line })
+        lines.appendContentsOf(["", "@end"])
+
+        let customAccessors = relationships.map { $0.customAccessorDeclarations }.flatMap{ $0 }.flatMap { $0 }
+        if !customAccessors.isEmpty {
+            lines.appendContentsOf(["", "@interface " + className + " (CoreDataGeneratedAccessors)", ""])
+            lines.appendContentsOf(customAccessors)
+            lines.appendContentsOf(["", "@end"])
+        }
+        lines.appendContentsOf(["", "NS_ASSUME_NONNULL_END", ""])
         
-        lines.appendContentsOf(["@implementation " + name, ""])
+        lines.appendContentsOf(["", "@implementation " + name, ""])
         lines.appendContentsOf(properties.map { property -> String? in
             property.transient ? nil : ("@dynamic " + property.name + ";")
         }.flatMap{ $0 })

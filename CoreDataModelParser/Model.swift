@@ -13,6 +13,7 @@ struct Entity {
     let attributes: [Attribute]
     let className: String
     let name: String
+    let parentEntityName: String
     var properties: [Property] {
         var properties = attributes.map { $0 as Property }
         properties.appendContentsOf(relationships.map { $0 as Property })
@@ -215,9 +216,10 @@ struct Model {
             let relationships = entity.childrenWithName("relationship").map(relationshipForNode)
             let className = entity.attributes["representedClassName"]!
             let name = entity.attributes["name"]!
+            let parentEntityName = entity.attributes["parentEntity"]
             let renamingIdentifier = entity.attributes["renamingIdentifier"]
             let syncable = entity.attributes["syncable"] == "YES"
-            return Entity(attributes: attributes, className: className, name: name, relationships: relationships, renamingIdentifier: renamingIdentifier, syncable: syncable)
+            return Entity(attributes: attributes, className: className, name: name, parentEntityName: parentEntityName ?? "", relationships: relationships, renamingIdentifier: renamingIdentifier, syncable: syncable)
         }
     }
 }
