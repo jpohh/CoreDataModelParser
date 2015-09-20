@@ -83,7 +83,7 @@ extension Model {
         lines.appendContentsOf(["@objc protocol CoreDataEntity {", "\tstatic var entityName: String { get }", "}", ""])
         entities.forEach { entity in
             lines.append("extension " + entity.className + ": CoreDataEntity {")
-            lines.append("\t@objc static var entityName = \"" + entity.name + "\"")
+            lines.append("\t@objc static let entityName = \"" + entity.name + "\"")
             lines.append("}")
             lines.append("")
         }
@@ -137,11 +137,22 @@ extension Property {
 
 extension Entity {
     var superclassName: String {
-        return parentEntityName ?? "NSManagedObject"
+        if !usingDefaultSuperclass {
+            return parentEntityName
+        } else {
+            return "NSManagedObject"
+        }
+    }
+    
+    var usingDefaultSuperclass: Bool {
+        return parentEntityName.isEmpty
     }
     
     var objCHeaderFile: File {
         var lines = ["// CoreDataModelParser generated"]
+        if !usingDefaultSuperclass {
+            lines.appendContentsOf(["", "#import \"" + superclassName + ".h\"", ""])
+        }
         lines.appendContentsOf(relationships.map { "@class " + $0.destinationEntityName + ";" })
         lines.appendContentsOf(["NS_ASSUME_NONNULL_BEGIN", ""])
         lines.appendContentsOf(["@interface " + className + ": " + superclassName, ""])
