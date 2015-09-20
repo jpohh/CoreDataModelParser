@@ -12,7 +12,10 @@ import CoreData
 struct CanconicalConsumer: ModelConsumer {
     var model: Model
     var files: [File] {
-        return entities.map{ $0.objCHeaderFile }
+        var files = entities.map{ $0.objCHeaderFile }
+        files.append(model.swiftFile)
+        files.append(model.objCAllHeadersFile)
+        return files
     }    
     var tests: [() -> Bool] {
         return []
@@ -73,17 +76,44 @@ extension Relationship {
     }
 }
 
+extension Model {
+    var swiftFile: File {
+        var lines = [String]()
+        lines.appendContentsOf(["// CoreDataModelParser generated", ""])
+        lines.appendContentsOf(["@objc protocol CoreDataEntity {", "\tstatic var entityName: String { get }", "}", ""])
+        entities.forEach { entity in
+            lines.append("extension " + entity.className + ": CoreDataEntity {")
+            lines.append("\t@objc static var entityName = \"" + entity.name + "\"")
+            lines.append("}")
+            lines.append("")
+        }
+        return File(name: "ModelUtilities-Generated.swift", lines: lines)
+    }
+    var objCAllHeadersFile: File {
+        var lines = [String]()
+        lines.appendContentsOf(entities.map { "#import \"" + $0.name + ".h\"" })
+        lines.append("")
+        return File(name: "Model-All.h", lines: lines)
+    }
+}
+
 extension Property {
     var modifiers: String {
         var annotations: [String] = []
-        if optional { annotations.append("nullable") }
+        if optional && isObjectType { annotations.append("nullable") }
         annotations.append("nonatomic")
-        if self is Relationship {
-            annotations.append("retain")
-        } else if let attribute = self as? Attribute where attribute.stringForType.rangeOfString("*") != nil {
-            annotations.append("retain")
-        }
+        if isObjectType { annotations.append("retain") }
         return "(" + annotations.joinWithSeparator(", ") + ")"
+    }
+    
+    var isObjectType: Bool {
+        if self is Relationship {
+            return true
+        } else if let attribute = self as? Attribute where attribute.stringForType.rangeOfString("*") != nil {
+            return true
+        } else {
+            return false
+        }
     }
         
     var line: String {
@@ -92,7 +122,7 @@ extension Property {
         line.appendContentsOf(" ")
         if let relationship = self as? Relationship {
             if relationship.toMany {
-                line.appendContentsOf("NSSet<" + relationship.destinationEntityName + " *> ")
+                line.appendContentsOf("NSSet<" + relationship.destinationEntityName + " *> *")
             } else {
                 line.appendContentsOf(relationship.destinationEntityName + " *")
             }
@@ -104,11 +134,13 @@ extension Property {
     }
 }
 
+
 extension Entity {
     var objCHeaderFile: File {
         var lines = ["// CoreDataModelParser generated"]
+        lines.appendContentsOf(relationships.map { "@class " + $0.destinationEntityName + ";" })
         lines.appendContentsOf(["NS_ASSUME_NONNULL_BEGIN", ""])
-        lines.appendContentsOf(["@interface " + name + ": JOManagedObject", ""])
+        lines.appendContentsOf(["@interface " + name + ": NSManagedObject", ""])
         lines.appendContentsOf(properties.sort { $0.name < $1.name }.map { $0.line })
         lines.appendContentsOf([""])
         lines.appendContentsOf(relationships.map { $0.customAccessorDeclarations }.flatMap{ $0 }.flatMap { $0 })

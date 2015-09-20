@@ -38,14 +38,23 @@ guard let outputPath = outputPath.value else {
     print("EXIT: Can't output files. No output path was provided.")
     exit(EX_USAGE)
 }
+
+let directory = outputPath + "/generated/"
+do {
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(directory)
+    try NSFileManager.defaultManager().createDirectoryAtPath(directory, withIntermediateDirectories: true, attributes: nil)
+} catch {
+    print("EXIT: error creating output directory: \(path)")
+    exit(EX_DATAERR)
+}
+
 let sourceFiles = consumers.map { $0.files }.flatMap { $0 }
 for file in sourceFiles {
     let allCode = file.lines.joinWithSeparator("\n")
-    let directory = outputPath + "/generated/"
     let path = directory + file.name
+
+    
     do {
-        try NSFileManager.defaultManager().createDirectoryAtPath(directory, withIntermediateDirectories: true, attributes: nil)
-        _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
         try allCode.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
         print("\(file.name) wrote to \(path)")
     } catch {
