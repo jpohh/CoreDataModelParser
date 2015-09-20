@@ -14,7 +14,6 @@ struct CanconicalConsumer: ModelConsumer {
     var files: [File] {
         var files: [File] = []
         files.appendContentsOf(entities.map{ $0.objCHeaderFile })
-        files.appendContentsOf(entities.map{ $0.objCImplementationFile })
         return files
     }    
     var tests: [() -> Bool] {
