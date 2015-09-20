@@ -24,7 +24,7 @@ do {
 let path = filePath.value!
 let dataModel = NSURL(fileURLWithPath: path)
 let model = Model(url: dataModel)
-var consumers: [ModelConsumer] = []
+var consumers: [ModelConsumer] = [ CanconicalConsumer(model: model) ]
 let tests = consumers.map { $0.tests }.flatMap { $0 }
 var testFailed = false
 for test in tests {
@@ -40,10 +40,12 @@ guard let outputPath = outputPath.value else {
 }
 let sourceFiles = consumers.map { $0.files }.flatMap { $0 }
 for file in sourceFiles {
-    let allCode = file.lines.joinWithSeparator(",")
-    let path = outputPath + "/generated/" + file.name
+    let allCode = file.lines.joinWithSeparator("\n")
+    let directory = outputPath + "/generated/"
+    let path = directory + file.name
     do {
-        try NSFileManager.defaultManager().createDirectoryAtPath(path, withIntermediateDirectories: true, attributes: nil)
+        try NSFileManager.defaultManager().createDirectoryAtPath(directory, withIntermediateDirectories: true, attributes: nil)
+        _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
         try allCode.writeToFile(path, atomically: false, encoding: NSUTF8StringEncoding)
         print("\(file.name) wrote to \(path)")
     } catch {
