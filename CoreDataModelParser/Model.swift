@@ -224,7 +224,7 @@ struct Model {
 
 
 protocol ModelConsumer {
-    var model: Model { get set }
+    var model: Model { get }
     var files: [File] { get }
     var tests: [ () -> Bool ] { get }
 }

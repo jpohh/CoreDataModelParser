@@ -12,9 +12,7 @@ import CoreData
 struct CanconicalConsumer: ModelConsumer {
     var model: Model
     var files: [File] {
-        var files: [File] = []
-        files.appendContentsOf(entities.map{ $0.objCHeaderFile })
-        return files
+        return entities.map{ $0.objCHeaderFile }
     }    
     var tests: [() -> Bool] {
         return []
@@ -122,8 +120,5 @@ extension Entity {
         }.flatMap{ $0 })
         lines.appendContentsOf(["", "@end", ""])
         return File(name: name + ".h", lines: lines)
-    }
-    var objCImplementationFile: File {
-        return File(name: name + ".m", lines: [])
     }
 }
