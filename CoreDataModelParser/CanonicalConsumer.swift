@@ -15,6 +15,7 @@ struct CanconicalConsumer: ModelConsumer {
         var files = entities.map{ $0.objCHeaderFile }
         files.append(model.swiftFile)
         files.append(model.objCAllHeadersFile)
+        files.append(model.joManagedObjectHeaderFile)
         return files
     }    
     var tests: [() -> Bool] {
@@ -79,13 +80,48 @@ extension Relationship {
 extension Model {
     var swiftFile: File {
         var lines = [String]()
+        
+        if let url = NSBundle.mainBundle().URLForResource("ModelUtilities-Generated", withExtension: "swift") {
+            if let string = try? String.init(contentsOfURL: url) {
+                lines.appendContentsOf(["", string, ""])
+            }
+        }
         lines.appendContentsOf(["// CoreDataModelParser generated", ""])
-        lines.appendContentsOf(["@objc protocol CoreDataEntity {", "\tstatic var entityName: String { get }", "}", ""])
         entities.forEach { entity in
-            lines.append("extension " + entity.className + ": CoreDataEntity {")
-            lines.append("\t@objc static let entityName = \"" + entity.name + "\"")
+            let needsOverride = !entity.usingDefaultSuperclass
+            lines.appendContentsOf(entity.swiftProtocolConformanceLines)
+            lines.append("")
+            
+            let extensionDeclaration = "extension " + entity.className + (entity.usingDefaultSuperclass ? ": CoreDataEntity" : "") + " {"
+            lines.append(extensionDeclaration)
+            
+            let functionDeclaration = "\t" + (needsOverride ? "override " : "") + "class func entityName() -> String { return \"\(entity.name)\" }"
+            lines.append(functionDeclaration)
+            
+            let inMainDeclaration = "\t" + (needsOverride ? "override " : "") + "class func inMain() -> \(entity.name) { return NSEntityDescription.insertNewObjectForEntityForName(\"\(entity.name)\", inManagedObjectContext: RFSDataController.shared().managedObjectContext) as! \(entity.name) }"
+            lines.append(inMainDeclaration)
+
+            let inMOCDeclaration = "\t" + (needsOverride ? "override " : "") + "class func insertInManagedObjectContext(moc: NSManagedObjectContext) -> \(entity.name) { return NSEntityDescription.insertNewObjectForEntityForName(\"\(entity.name)\", inManagedObjectContext: moc) as! \(entity.name) }"
+            lines.append(inMOCDeclaration)
+            
+            let singularName = entity.userInfo["NameSingular"]!
+            lines.append("\t" + (needsOverride ? "override "  : "") + "class func localizedNameSingular() -> String { return \"\(singularName)\" }")
+            
+            let pluralName = entity.userInfo["NamePlural"]!
+            lines.append("\t" + (needsOverride ? "override "  : "") + "class func localizedNamePlural() -> String { return \"\(pluralName)\" }")
+            
+            var propertiesLine = "\t" + (needsOverride ? "override "  : "") + "class func properties() -> [CoreDataProperty] { return [ "
+            let propertyNames = entity.properties.map { entity.name + "Properties" + "." + $0.name }
+            let propertyNamesJoined = propertyNames.joinWithSeparator(", ")
+            propertiesLine.appendContentsOf(propertyNamesJoined)
+            propertiesLine.appendContentsOf(" ] }")
+            lines.append(propertiesLine)
+            
+            lines.append("\t" + (needsOverride ? "override "  : "") + "var shortUniqueID: String { return uniqueID.truncatedToLength(8) }")
+            
             lines.append("}")
             lines.append("")
+
         }
         return File(name: "ModelUtilities-Generated.swift", lines: lines)
     }
@@ -94,6 +130,11 @@ extension Model {
         lines.appendContentsOf(entities.map { "#import \"" + $0.name + ".h\"" })
         lines.append("")
         return File(name: "Model-All.h", lines: lines)
+    }
+    var joManagedObjectHeaderFile: File {
+        let filename = "JOManagedObject.h"
+        let lines = ["@interface JOManagedObject: NSManagedObject ", "@end", "", "@implementation JOManagedObject", "@end"]
+        return File(name: filename, lines: lines)
     }
 }
 
@@ -134,13 +175,18 @@ extension Property {
     }
 }
 
+extension Relationship {
+    var toManyString: String {
+        return toMany ? "true" : "false"
+    }
+}
 
 extension Entity {
     var superclassName: String {
         if !usingDefaultSuperclass {
             return parentEntityName
         } else {
-            return "NSManagedObject"
+            return "JOManagedObject"
         }
     }
     
@@ -148,8 +194,39 @@ extension Entity {
         return parentEntityName.isEmpty
     }
     
+    var swiftProtocolConformanceLines: [String] {
+        var lines = ["@objc class \(name)Properties: NSObject {"]
+        for property in properties {
+            if let relationship = property as? Relationship {
+                lines.append("\tclass var \(relationship.name): CoreDataRelationship { return CoreDataRelationship(key: \"\(relationship.name)\", localizedName: \"\", toMany: \(relationship.toManyString)) }")
+            } else if let attribute = property as? Attribute {
+                let format = "None"
+                lines.append("\tclass var \(attribute.name): CoreDataAttribute { return CoreDataAttribute(key: \"\(attribute.name)\", localizedName: \"\", format: RFSFormat.\(format)) }")
+            }
+        }
+        lines.append("}")
+        lines.append("")
+        
+        lines.append("@objc class \(name)Relationships: NSObject {")
+        for relationship in relationships {
+            lines.append("\tclass var \(relationship.name): String { return \"\(relationship.name)\" }")
+        }
+        lines.append("}")
+        lines.append("")
+        
+        lines.append("@objc class \(name)Attributes: NSObject {")
+        for attribute in attributes {
+            lines.append("\tclass var \(attribute.name): String { return \"\(attribute.name)\" }")
+        }
+        lines.append("}")
+        lines.append("")
+        
+        return lines
+    }
+    
     var objCHeaderFile: File {
         var lines = ["// CoreDataModelParser generated"]
+        lines.appendContentsOf(["#import \"JOManagedObject.h\""])
         if !usingDefaultSuperclass {
             lines.appendContentsOf(["", "#import \"" + superclassName + ".h\"", ""])
         }

@@ -22,6 +22,7 @@ struct Entity {
     let relationships: [Relationship]
     let renamingIdentifier: String?
     let syncable: Bool
+    let userInfo: [String: String]
 }
 
 struct Attribute: Property {
@@ -219,7 +220,8 @@ struct Model {
             let parentEntityName = entity.attributes["parentEntity"]
             let renamingIdentifier = entity.attributes["renamingIdentifier"]
             let syncable = entity.attributes["syncable"] == "YES"
-            return Entity(attributes: attributes, className: className, name: name, parentEntityName: parentEntityName ?? "", relationships: relationships, renamingIdentifier: renamingIdentifier, syncable: syncable)
+            let userInfo = userInfoFromNode(entity)
+            return Entity(attributes: attributes, className: className, name: name, parentEntityName: parentEntityName ?? "", relationships: relationships, renamingIdentifier: renamingIdentifier, syncable: syncable, userInfo: userInfo)
         }
     }
 }
