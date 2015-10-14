@@ -28,6 +28,7 @@ struct Entity {
 struct Attribute: Property {
     let attributeType: NSAttributeType
     let defaultValueAsString: String
+    let entityName: String
     let indexed: Bool
     let name: String
     let optional: Bool
@@ -41,6 +42,7 @@ struct Attribute: Property {
 struct Relationship: Property {
     let deleteRule: NSDeleteRule
     let destinationEntityName: String
+    let entityName: String
     let indexed: Bool
     let maxCount: Int
     let minCount: Int
@@ -57,6 +59,7 @@ struct Relationship: Property {
 }
 
 protocol Property {
+    var entityName: String { get }
     var indexed: Bool { get }
     var name: String { get }
     var optional: Bool { get }
@@ -131,6 +134,7 @@ let attributeForNode: (JiNode) -> (Attribute) = { node in
     let attributeTypeString = node.attributes["attributeType"]
     let attributeType = attributeTypeForString(attributeTypeString)
     let defaultValue = node.attributes["defaultValueString"] ?? ""
+    let entityName = node.parent!.attributes["name"]!
     let indexed = node.attributes["indexed"] == "YES"
     let name = node.attributes["name"]!
     let optional = node.attributes["optional"] == "YES"
@@ -140,13 +144,14 @@ let attributeForNode: (JiNode) -> (Attribute) = { node in
     let transient = node.attributes["transient"] == "YES"
     let children = node.childrenWithName("userInfo")
     let userInfo = userInfoFromNode(node)
-    return Attribute(attributeType: attributeType, defaultValueAsString: defaultValue, indexed: indexed, name: name, optional: optional, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, syncable: syncable, transient: transient, userInfo: userInfo ?? [:])
+    return Attribute(attributeType: attributeType, defaultValueAsString: defaultValue, entityName: entityName, indexed: indexed, name: name, optional: optional, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, syncable: syncable, transient: transient, userInfo: userInfo ?? [:])
 }
 
 let relationshipForNode: (JiNode) -> Relationship = { node in
     let deleteRuleString = node.attributes["deleteRule"]
     let deleteRule = NSDeleteRule.NoActionDeleteRule
     let destinationEntityName = node.attributes["destinationEntity"]!
+    let entityName = node.parent!.attributes["name"]!
     let indexed = node.attributes["indexed"] == "YES"
     let maxCount = Int(node.attributes["maxCount"] ?? "0")!
     let minCount = Int(node.attributes["minCount"] ?? "0")!
@@ -160,7 +165,7 @@ let relationshipForNode: (JiNode) -> Relationship = { node in
         return maxCount  > 1
     }
     let userInfo = userInfoFromNode(node)
-    return Relationship(deleteRule: deleteRule, destinationEntityName: destinationEntityName, indexed: indexed, maxCount: maxCount, minCount: minCount, name: name, optional: optional, ordered: ordered, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, transient: transient, userInfo: userInfo)
+    return Relationship(deleteRule: deleteRule, destinationEntityName: destinationEntityName, entityName: entityName, indexed: indexed, maxCount: maxCount, minCount: minCount, name: name, optional: optional, ordered: ordered, renamingIdentifier: renamingIdentifier, storedInExternalRecord: storedInExternalRecord, transient: transient, userInfo: userInfo)
 }
 
 
@@ -215,7 +220,7 @@ struct Model {
         entities = entityNodes.map { (entity: JiNode) -> Entity in
             let attributes = entity.childrenWithName("attribute").map(attributeForNode)
             let relationships = entity.childrenWithName("relationship").map(relationshipForNode)
-            let className = entity.attributes["representedClassName"]!
+            let className = entity.attributes["representedClassName"]! // if you hit here you forget to specify a class name in the Core Data model
             let name = entity.attributes["name"]!
             let parentEntityName = entity.attributes["parentEntity"]
             let renamingIdentifier = entity.attributes["renamingIdentifier"]
